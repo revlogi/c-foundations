@@ -1,0 +1,9 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+
+Macros:
+  - 'TRY=if (true) {'
+  - 'EXCEPT(e)=} else if (true) {'
+  - 'ELSE=} else {'
+  - 'FINALLY=} {'
+  - 'END_TRY=}'
