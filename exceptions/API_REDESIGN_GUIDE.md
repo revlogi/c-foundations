@@ -125,7 +125,7 @@ EXCEPT_TRY {
 
 ```c
 typedef struct Except_Info {
-    const Except_T *exception;
+    const Exception *exception;
     const char *file;
     int line;
 } Except_Info;
@@ -158,10 +158,10 @@ EXCEPT_CATCH(Foo, caught) {
 
 ```c
 #define EXCEPT_DECLARE(name_) \
-    extern const Except_T name_
+    extern const Exception name_
 
 #define EXCEPT_DEFINE(name_, reason_) \
-    const Except_T name_ = { .reason = (reason_) }
+    const Exception name_ = { .reason = (reason_) }
 ```
 
 公共异常的写法：
@@ -249,7 +249,7 @@ Except_raise(except__frame.info.exception,
 示例声明：
 
 ```c
-_Noreturn void Except_raise(const Except_T *exception,
+_Noreturn void Except_raise(const Exception *exception,
                             const char *file,
                             int line);
 ```
@@ -340,12 +340,12 @@ cc -std=c11 -O2 -Wall -Wextra -Wpedantic \
 #include <setjmp.h>
 #include <stddef.h>
 
-typedef struct Except_T {
+typedef struct Exception {
     const char *reason;
-} Except_T;
+} Exception;
 
 typedef struct Except_Info {
-    const Except_T *exception;
+    const Exception *exception;
     const char *file;
     int line;
 } Except_Info;
@@ -367,15 +367,15 @@ enum {
 
 extern Except_Frame *Except_stack;
 
-_Noreturn void Except_raise(const Except_T *exception,
+_Noreturn void Except_raise(const Exception *exception,
                             const char *file,
                             int line);
 
 #define EXCEPT_DECLARE(name_) \
-    extern const Except_T name_
+    extern const Exception name_
 
 #define EXCEPT_DEFINE(name_, reason_) \
-    const Except_T name_ = { .reason = (reason_) }
+    const Exception name_ = { .reason = (reason_) }
 
 #define EXCEPT_RAISE(exception_) \
     Except_raise(&(exception_), __FILE__, __LINE__)
@@ -442,7 +442,7 @@ _Noreturn void Except_raise(const Except_T *exception,
 
 Except_Frame *Except_stack = NULL;
 
-_Noreturn void Except_raise(const Except_T *exception,
+_Noreturn void Except_raise(const Exception *exception,
                             const char *file,
                             int line) {
     Except_Frame *frame = Except_stack;

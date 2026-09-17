@@ -22,8 +22,8 @@ struct Table {
     size_t count;
 };
 
-Table_T Table_init(void) {
-    Table_T table;
+Table *table_new(void) {
+    Table *table;
     NEW(table);
 
     table->capacity = INITIAL_SIZE;
@@ -33,8 +33,8 @@ Table_T Table_init(void) {
     return table;
 }
 
-void Table_free(Table_T *table_ptr) {
-    Table_T table = *table_ptr;
+void table_free(Table **table_ptr) {
+    Table *table = *table_ptr;
     for (size_t i = 0; i < table->capacity; i++) {
         for (Node_T curr = table->buckets[i]; curr;) {
             Node_T next = curr->next;
@@ -46,7 +46,7 @@ void Table_free(Table_T *table_ptr) {
     FREE(*table_ptr);
 }
 
-size_t Table_size(Table_T table) { return table->count; }
+size_t table_size(const Table *table) { return table->count; }
 
 static size_t bucket_index(size_t capacity, ByteView key) {
     return (size_t)(byte_view_hash(key) % capacity);
@@ -68,7 +68,7 @@ static void migrate_list(Node_T curr, Node_T *new_buckets, size_t new_capacity) 
     migrate_list(next, new_buckets, new_capacity);
 }
 
-static void resize(Table_T table) {
+static void resize(Table *table) {
     size_t new_size = table->capacity * 2;
 
     Node_T *new_buckets = CALLOC(new_size, sizeof(Node_T));
@@ -82,7 +82,7 @@ static void resize(Table_T table) {
     table->capacity = new_size;
 }
 
-InstallResult Table_install(Table_T table, ByteView key, ByteView value) {
+TableInstallResult table_install(Table *table, ByteView key, ByteView value) {
     uint64_t index = bucket_index(table->capacity, key);
     Node_T head = table->buckets[index];
     for (Node_T curr = head; curr; curr = curr->next) {
@@ -109,7 +109,7 @@ InstallResult Table_install(Table_T table, ByteView key, ByteView value) {
     return TABLE_INSERTED;
 }
 
-bool Table_lookup(Table_T table, ByteView key, ByteView *out_value) {
+bool table_lookup(const Table *table, ByteView key, ByteView *out_value) {
     uint64_t index = bucket_index(table->capacity, key);
     for (Node_T curr = table->buckets[index]; curr; curr = curr->next) {
         if (byte_view_equal(curr->key, key)) {
@@ -120,7 +120,7 @@ bool Table_lookup(Table_T table, ByteView key, ByteView *out_value) {
     return false;
 }
 
-bool Table_remove(Table_T table, ByteView key) {
+bool table_remove(Table *table, ByteView key) {
     uint64_t index = bucket_index(table->capacity, key);
 
     for (Node_T *link = &table->buckets[index]; (*link); link = &(*link)->next) {

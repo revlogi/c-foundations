@@ -6,7 +6,7 @@
 #include "../exceptions/except.h"
 #include "mem.h"
 
-const Except_T Mem_Failed = {"Allocation failed"};
+const Exception Mem_Failed = {"Allocation failed"};
 
 // checking types
 union align {

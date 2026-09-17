@@ -3,7 +3,7 @@
 #include "../exceptions/except.h"
 
 // exported exceptions
-const Except_T Mem_Failed;
+extern const Exception Mem_Failed;
 
 // exported functions
 void* Mem_alloc(long nbytes, const char* file, int line);

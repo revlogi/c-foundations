@@ -4,11 +4,10 @@
 #include <stdlib.h>
 
 #include "assert.h"
-#define T Except_T
 
 Except_Frame *Except_stack = NULL;
 
-_Noreturn void Except_raise(const T *e, const char *file, int line) {
+_Noreturn void Except_raise(const Exception *e, const char *file, int line) {
     Except_Frame *p = Except_stack;
 
     assert(e);
@@ -28,6 +27,6 @@ _Noreturn void Except_raise(const T *e, const char *file, int line) {
     p->exception = e;
     p->file = file;
     p->line = line;
-    Except_stack = Except_stack->prev;
-    longjmp(p->env, Except_raised);
+
+    longjmp(p->env, EXCEPT_RAISED);
 }

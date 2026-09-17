@@ -26,11 +26,12 @@ AtomPool *atom_pool_new(void) {
     pool->capacity = 1024;
     pool->size = 0;
 
-    TRY pool->table = CALLOC(pool->capacity, sizeof(pool->table[0]));
-    EXCEPT(Mem_Failed)
-    FREE(pool);
-    RERAISE;
-    END_TRY
+    TRY {
+        pool->table = CALLOC(pool->capacity, sizeof(pool->table[0]));
+    } EXCEPT(Mem_Failed) {
+        FREE(pool);
+        RERAISE;
+    } END_TRY;
 
     return pool;
 }

@@ -6,7 +6,7 @@
 #include "../exceptions/assert.h"
 #include "../exceptions/except.h"
 
-const Except_T Mem_Failed = {"Allocation failed"};
+const Exception Mem_Failed = {"Allocation failed"};
 
 void *Mem_alloc(long nbytes, const char *file, int line) {
     void *ptr;

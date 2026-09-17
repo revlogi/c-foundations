@@ -18,14 +18,15 @@ struct List {
     size_t length;
 };
 
-List_T List_new(void) {
-    List_T list;
+List *list_new(void) {
+    List *list;
     NEW(list);
-    TRY NEW(list->sentinel);
-    EXCEPT(Mem_Failed)
-    FREE(list);
-    RERAISE;
-    END_TRY
+    TRY {
+        NEW(list->sentinel);
+    } EXCEPT(Mem_Failed) {
+        FREE(list);
+        RERAISE;
+    } END_TRY;
 
     list->sentinel->prev = list->sentinel;
     list->sentinel->next = list->sentinel;
@@ -35,15 +36,15 @@ List_T List_new(void) {
     return list;
 }
 
-void List_free(List_T *list) {
+void list_free(List **list) {
     assert(list && *list);
 
-    List_clear(*list, NULL);
+    list_clear(*list, NULL);
     FREE((*list)->sentinel);
     FREE(*list);
 }
 
-void List_clear(List_T list, List_destroy_fn destroy) {
+void list_clear(List *list, ListDestroyFn destroy) {
     assert(list && list->sentinel);
 
     Node_T sentinel = list->sentinel;
@@ -63,17 +64,17 @@ void List_clear(List_T list, List_destroy_fn destroy) {
     list->length = 0;
 }
 
-size_t List_length(List_const_T list) {
+size_t list_length(const List *list) {
     assert(list && list->sentinel);
     return list->length;
 }
 
-bool List_empty(List_const_T list) {
+bool list_empty(const List *list) {
     assert(list && list->sentinel);
     return list->length == 0;
 }
 
-bool List_front(List_const_T list, void **value) {
+bool list_front(const List *list, void **value) {
     assert(list && list->sentinel);
     assert(value);
 
@@ -85,7 +86,7 @@ bool List_front(List_const_T list, void **value) {
     return true;
 }
 
-bool List_back(List_const_T list, void **value) {
+bool list_back(const List *list, void **value) {
     assert(list && list->sentinel);
     assert(value);
 
@@ -97,7 +98,7 @@ bool List_back(List_const_T list, void **value) {
     return true;
 }
 
-void List_push_front(List_T list, void *value) {
+void list_push_front(List *list, void *value) {
     assert(list && list->sentinel);
     Node_T sentinel = list->sentinel;
 
@@ -114,7 +115,7 @@ void List_push_front(List_T list, void *value) {
     list->length++;
 }
 
-bool List_pop_front(List_T list, void **value) {
+bool list_pop_front(List *list, void **value) {
     assert(list && list->sentinel);
     Node_T sentinel = list->sentinel;
 
@@ -139,7 +140,7 @@ bool List_pop_front(List_T list, void **value) {
     return true;
 }
 
-void List_push_back(List_T list, void *value) {
+void list_push_back(List *list, void *value) {
     assert(list && list->sentinel);
     Node_T sentinel = list->sentinel;
 
@@ -156,7 +157,7 @@ void List_push_back(List_T list, void *value) {
     list->length++;
 }
 
-bool List_pop_back(List_T list, void **value) {
+bool list_pop_back(List *list, void **value) {
     assert(list && list->sentinel);
     Node_T sentinel = list->sentinel;
 
@@ -181,16 +182,16 @@ bool List_pop_back(List_T list, void **value) {
     return true;
 }
 
-void List_splice(List_T destination, List_T *source_ptr) {
+void list_splice(List *destination, List **source_ptr) {
     assert(source_ptr);
 
-    List_T source = *source_ptr;
+    List *source = *source_ptr;
     assert(destination && destination->sentinel);
     assert(source && source->sentinel);
     assert(destination != source);
 
     if (source->length == 0) {
-        List_free(source_ptr);
+        list_free(source_ptr);
         return;
     }
 
@@ -207,21 +208,21 @@ void List_splice(List_T destination, List_T *source_ptr) {
     sou_sentinel->next = sou_sentinel;
     sou_sentinel->prev = sou_sentinel;
     source->length = 0;
-    List_free(source_ptr);
+    list_free(source_ptr);
 }
 
-List_T List_copy(List_const_T list) {
+List *list_copy(const List *list) {
     assert(list && list->sentinel);
 
-    List_T new_list = List_new();
+    List *new_list = list_new();
     Node_T p = list->sentinel->next;
     for (; p != list->sentinel; p = p->next) {
-        List_push_back(new_list, p->data);
+        list_push_back(new_list, p->data);
     }
     return new_list;
 }
 
-void List_reverse(List_T list) {
+void list_reverse(List *list) {
     assert(list && list->sentinel);
 
     Node_T sentinel = list->sentinel;
@@ -235,7 +236,7 @@ void List_reverse(List_T list) {
     } while (p != sentinel);
 }
 
-void List_map(List_T list, List_apply_fn apply, void *context) {
+void list_map(List *list, ListApplyFn apply, void *context) {
     assert(list && list->sentinel);
     assert(apply);
 
@@ -245,10 +246,10 @@ void List_map(List_T list, List_apply_fn apply, void *context) {
     }
 }
 
-void **List_to_array(List_const_T list, size_t *count) {
+void **list_to_array(const List *list, size_t *count) {
     assert(count);
 
-    size_t n = List_length(list);
+    size_t n = list_length(list);
     if (n == 0) {
         *count = 0;
         return NULL;
